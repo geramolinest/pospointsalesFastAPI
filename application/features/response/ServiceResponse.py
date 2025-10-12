@@ -7,9 +7,6 @@ T = TypeVar('T')
 
 class ServiceResponse(Generic[T]):
     
-    def __init__(self) -> None:
-        pass
-    
     @staticmethod
     def ok_response(msg: str = 'Operation completed successfully', data: T = None) -> APIResponse[T]:
         return APIResponse(
