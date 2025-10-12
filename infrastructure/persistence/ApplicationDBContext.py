@@ -25,7 +25,7 @@ class ApplicationDBContext:
             
         return cls._instance
     
-    def __build_engine(self) ->None:
+    def __build_engine(self) -> None:
         
         uri_env  = os.getenv('DATABASE_URI')
         

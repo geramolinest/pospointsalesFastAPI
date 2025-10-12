@@ -21,13 +21,13 @@ class CategoriesRepository:
         
         return [ *scalars]
     
-    async def get_category_by_id(self, id: int) -> Category:
+    async def get_category_by_id(self, id: int) -> Category | None:
         
         stmt = select(Category).where(Category.id == id)
         
         promise = await self.__db_context.execute(stmt)
     
-        return promise.scalar_one()
+        return promise.scalar_one_or_none()
     
     async def add_category(self, category: Category) -> Category:
         
@@ -39,13 +39,13 @@ class CategoriesRepository:
         
         return category
     
-    async def get_category_by_name(self, category_name: str) -> Category:
+    async def get_category_by_name(self, category_name: str) -> Category | None:
         
         stmt = select(Category).where(Category.category_name == category_name.strip())
         
         promise = await self.__db_context.execute(stmt)
         
-        return promise.scalar_one()
+        return promise.scalar_one_or_none()
     
     async def any_category_by_name(self, category_name: str) -> bool:
         
