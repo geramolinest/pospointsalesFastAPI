@@ -1,0 +1,1 @@
+from .CategoriesRepository import CategoriesRepository  # type: ignore

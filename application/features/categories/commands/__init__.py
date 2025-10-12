@@ -1,0 +1,1 @@
+from .addcategory.AddCategoryCommand import AddCategoryCommand  # type: ignore
