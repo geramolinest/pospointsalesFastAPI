@@ -11,15 +11,15 @@ class CategoriesRepository:
     def __init__(self, db_context: DbSession) -> None:
         self.__db_context = db_context
         
-    async def get_all_categories(self) -> list[Category]:
+    async def get_all_categories(self, limit: int = 100, offset: int = 0) -> list[Category]:
         
-        stmt = select(Category).where(Category.is_active).order_by(Category.id)
+        stmt = select(Category).where(Category.is_active).limit(limit=limit).offset(offset=offset).order_by(Category.id)
         
         result_promise = await self.__db_context.execute(stmt)
         
         scalars = result_promise.scalars().all()
         
-        return [ *scalars]
+        return [ *scalars ]
     
     async def get_category_by_id(self, id: int) -> Category | None:
         

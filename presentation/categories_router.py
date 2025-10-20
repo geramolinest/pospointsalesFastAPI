@@ -1,7 +1,7 @@
 from fastapi.routing import APIRouter
 from fastapi.exceptions import HTTPException
 from typing import Annotated
-from fastapi import Depends, Path
+from fastapi import Depends, Path, Query
 
 from application.dto import AddCategory, GetCategory
 from application.features.categories.commands import AddCategoryCommand
@@ -22,8 +22,8 @@ async def create_category( add_category: AddCategory, service: Annotated[AddCate
     return result
 
 @categories_router.get('')
-async def get_all_categories(service: Annotated[GetAllCategoriesFeature, Depends(GetAllCategoriesFeature)] ) -> APIResponse[list[GetCategory]]:
-    result = await service.get_all_categories()
+async def get_all_categories( service: Annotated[GetAllCategoriesFeature, Depends(GetAllCategoriesFeature)], limit: int = Query(default=100, ge=0), offset: int = Query(default=0, ge=0) ) -> APIResponse[list[GetCategory]]:
+    result = await service.get_all_categories(limit, offset)
     
     if result.status_code > 299:
         raise HTTPException(result.status_code, detail={ **result.model_dump() })

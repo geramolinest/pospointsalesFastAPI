@@ -17,9 +17,9 @@ class GetAllCategoriesFeature:
         self.__repository = repository
         self.__response = ServiceResponse[list[GetCategory]]()
         
-    async def get_all_categories(self) -> APIResponse[list[GetCategory]]:
+    async def get_all_categories(self, limit: int = 100, offset: int = 0) -> APIResponse[list[GetCategory]]:
         try:            
-            result = await self.__repository.get_all_categories()
+            result = await self.__repository.get_all_categories(limit=limit, offset=offset)
             return self.__response.ok_response( data= [ GetCategory( **item.__dict__ ) for item in result ])
         except Exception as e:
             logging.error(e)

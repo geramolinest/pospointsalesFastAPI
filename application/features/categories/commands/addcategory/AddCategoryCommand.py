@@ -31,7 +31,6 @@ class AddCategoryCommand:
             
             category_saved: Category = await self.__reposotiry.add_category(Category(**category_to_be_saved.model_dump()))
             
-
             return self.__response.created_response(data=GetCategory(**category_saved.__dict__))
         except Exception as e:
             logging.error('Error add_category method', e.args)
