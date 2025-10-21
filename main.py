@@ -7,4 +7,3 @@ load_dotenv()
 server = Server()
 
 app = server.get_app()
-

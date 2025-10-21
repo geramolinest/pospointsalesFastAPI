@@ -5,7 +5,7 @@ import asyncio
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSession, async_sessionmaker
 
-from domain.entities import Base, Category # type: ignore
+from domain.entities import Base, Category, Role, User, RoleUser # type: ignore
 
 class ApplicationDBContext:
     
@@ -19,8 +19,8 @@ class ApplicationDBContext:
             cls._instance = super(ApplicationDBContext, cls).__new__(cls)          
             logging.info('Setting DBContext done')
             cls._instance.__build_engine()
-            loop = asyncio.get_event_loop()
-            loop.create_task(cls._instance.__sync_database())
+            #loop = asyncio.get_event_loop()
+            #loop.create_task(cls._instance.__sync_database())
             cls._instance.__build_session()
             
         return cls._instance
@@ -36,7 +36,8 @@ class ApplicationDBContext:
         
         self.__engine = create_async_engine(uri_env, echo=True)
         
-    async def __sync_database(self) -> None:
+    async def sync_database(self) -> None:
+    
         async with self.__engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         await asyncio.sleep(0)       
