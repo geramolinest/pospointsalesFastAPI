@@ -1,5 +1,5 @@
 from typing_extensions import Self
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, field_validator, model_validator, ValidationError
 
 class AddCategory(BaseModel):
     
@@ -14,6 +14,6 @@ class AddCategory(BaseModel):
     def check_category_length(self) -> Self:
         
         if self.category_name.__len__() > 50:
-            raise ValueError('Category name too long')
+            raise ValidationError('Category name too long')
         
         return self

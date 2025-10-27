@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from infrastructure.persistence import ApplicationDBContext
 from presentation import main_routerv1
 
+
 class Server:
     
     __app: FastAPI
