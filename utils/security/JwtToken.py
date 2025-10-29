@@ -4,7 +4,7 @@ import logging
 from uuid import UUID
 from datetime import datetime, timedelta, timezone
 from utils import ConfigDep, Config
-from application.dto.security import Token
+from application.dto.security import Token, GetUser
 
 class JwtToken:
     
@@ -43,8 +43,27 @@ class JwtToken:
         expiration_token: int = int(self.__expires_delta) * 60
         
         
-        token: Token =  Token( token=encoded_jwt, expires_in=expiration_token)
+        token: Token =  Token( access_token=encoded_jwt, expires_in=expiration_token)
         
         logging.info('Token entity builded successfully, returning Token entity as response from JwtToken utility.')
         
         return token
+    
+    def verify_token(self, token: str) -> GetUser | None:
+
+        if not self.__secret_key:
+            raise jwt.InvalidKeyError('Key not provided, check your env file')
+ 
+        if not self.__algorithm:
+            raise jwt.InvalidAlgorithmError('Not algorithm provided, check your env file')
+        
+        try:
+
+            decoded_token: dict[str, str | datetime | int] = jwt.decode(token, self.__secret_key, self.__algorithm)
+
+            user_from_decoded_token: GetUser = GetUser( **decoded_token ) # type: ignore
+
+            return user_from_decoded_token
+        except Exception as e:
+            logging.error(e)
+            return None

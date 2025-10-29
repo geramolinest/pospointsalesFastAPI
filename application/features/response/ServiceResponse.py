@@ -51,5 +51,14 @@ class ServiceResponse(Generic[T]):
             data=data,
             message=msg
         )
+    
+    @staticmethod
+    def unatuhorized_response(msg: str = 'Invalid credentials or expired authentication token.', data: T = None) -> APIResponse[T]:
+        return APIResponse(
+            status_code=401,
+            status_text=Constants.UNAUTHORIZED_STATUS_TEXT,
+            data=data,
+            message=msg
+        )
         
     

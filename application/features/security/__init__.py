@@ -1,0 +1,1 @@
+from .decorators.authorize import authorize #type: ignore

@@ -1,0 +1,1 @@
+from ..middlewares.GlobalContextRequestMiddleware import current_request #type: ignore

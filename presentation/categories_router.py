@@ -6,12 +6,14 @@ from fastapi import Depends, Path, Query
 from application.dto import AddCategory, GetCategory
 from application.features.categories.commands import AddCategoryCommand
 from application.features.categories.queries import GetAllCategoriesFeature, GetCategoryByIdFeature
+from application.features.security import authorize
 
 from domain.entities import APIResponse
 
 categories_router: APIRouter = APIRouter(prefix='/categories', tags=['Categories'])
 
 @categories_router.post('/create', response_model=APIResponse[GetCategory])
+@authorize()
 async def create_category( add_category: AddCategory, service: Annotated[AddCategoryCommand, Depends(AddCategoryCommand)]):
         
     result = await service.add_category( add_category )
@@ -22,6 +24,7 @@ async def create_category( add_category: AddCategory, service: Annotated[AddCate
     return result
 
 @categories_router.get('')
+@authorize()
 async def get_all_categories( service: Annotated[GetAllCategoriesFeature, Depends(GetAllCategoriesFeature)], limit: int = Query(default=100, ge=0), offset: int = Query(default=0, ge=0) ) -> APIResponse[list[GetCategory]]:
     result = await service.get_all_categories(limit, offset)
     
@@ -32,6 +35,7 @@ async def get_all_categories( service: Annotated[GetAllCategoriesFeature, Depend
 
 
 @categories_router.get('/{id}')
+@authorize()
 async def get_category_by_id(id: Annotated[int, Path(title='Id category to be searched')], service: Annotated[GetCategoryByIdFeature, Depends(GetCategoryByIdFeature)]) -> APIResponse[GetCategory]:
     
     result = await service.get_category_by_id(id)
