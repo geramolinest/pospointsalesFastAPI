@@ -6,10 +6,11 @@ from infrastructure.repositories import UsersRepository
 from domain.entities import APIResponse, User
 from utils.security import BCrypt, BCryptDep, JwtToken, JwtTokenDep
 
-from .....dto.security import SignInUserEmail, Token, GetUser
+from .....dto.security import SignInUserUsername, Token, GetUser
 from ....response.ServiceResponse import ServiceResponse
 
-class SignInEmail:
+
+class SignInUsername:
 
     __repository: UsersRepository
     __bcrypt:  BCrypt
@@ -22,11 +23,10 @@ class SignInEmail:
         self.__response = ServiceResponse[Token]()
         self.__jwt = jwt
 
-    
-    async def sign_in_user_by_email(self, sign_in_user: SignInUserEmail) -> APIResponse[Token]:
+    async def sign_in_user_by_username(self, sign_in_user: SignInUserUsername) -> APIResponse[Token]:
         try:
 
-            user: User | None = await self.__repository.get_user_by_email( sign_in_user.email )
+            user: User | None = await self.__repository.get_user_by_username( sign_in_user.username )
 
             if not user:
                 return self.__response.unatuhorized_response(msg='Incorrect email or password') #type: ignore

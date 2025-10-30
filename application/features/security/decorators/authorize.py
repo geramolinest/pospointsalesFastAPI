@@ -1,3 +1,4 @@
+import logging
 from fastapi import Request, status
 from asyncio import iscoroutinefunction
 
@@ -27,15 +28,14 @@ def authorize( roles: list[str] = [] ) -> Callable[[RouteHandler[R]], RouteHandl
             
             request: Request | None = current_request.get()
 
+            response_builder = ServiceResponse[Any]()
+
             if not request:
-                print('Request is no present :(')
-                raise Exception('Request is no present in http petition')
+                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail={ **response_builder.internal_server_error().model_dump() })
             
             config: Config = Config()
 
             jwt: JwtToken = JwtToken(config)
-
-            response_builder = ServiceResponse[Any]()
 
             token_str: str | None = request.headers.get('authorization')
 
@@ -49,7 +49,7 @@ def authorize( roles: list[str] = [] ) -> Callable[[RouteHandler[R]], RouteHandl
             if not payload:
                 raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail={ **response_builder.unatuhorized_response().model_dump() })
             
-            print({ **payload.model_dump() })
+            logging.info({ **payload.model_dump() })
 
             if iscoroutinefunction(handler):
                 result: R = await handler(*args, **kwargs)
