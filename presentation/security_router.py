@@ -47,4 +47,7 @@ async def user_me(username: str, service: Annotated[UserMeFeature, Depends(UserM
 
     result: APIResponse[GetUser] = await service.user_me_username( username )
 
+    if result.status_code > 299:
+        raise HTTPException(result.status_code, detail={ **result.model_dump() })
+
     return result

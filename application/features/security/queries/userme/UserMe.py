@@ -25,6 +25,9 @@ class UserMeFeature:
         try:
             response: User | None = await self.__respository.user_me_by_username( username )
 
+            if response is None:
+                return self.__response.not_found_response(msg='User does not exists') #type: ignore
+
             return self.__response.ok_response(msg='User fetched successfully', data=GetUser(**response.__dict__))
         except Exception as e:
             logging.error(e)
