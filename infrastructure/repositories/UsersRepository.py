@@ -52,14 +52,6 @@ class UsersRepository:
     
         return user
     
-    async def user_me_by_username(self, user_name: str) -> User | None:
-        
-        stmt = select(User).where(User.normalized_username == user_name.upper().strip())
-        
-        result = await self.__db_context.execute(stmt)
-        
-        return result.scalar_one_or_none()
-    
     async def add_admin_user(self) -> None:
         
         username = self.__config.get_value('ADMIN_USER')

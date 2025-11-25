@@ -23,7 +23,7 @@ class UserMeFeature:
     async def user_me_username(self, username: str) -> APIResponse[GetUser]:
 
         try:
-            response: User | None = await self.__respository.user_me_by_username( username )
+            response: User | None = await self.__respository.get_user_by_username( username )
 
             if response is None:
                 return self.__response.not_found_response(msg='User does not exists') #type: ignore
