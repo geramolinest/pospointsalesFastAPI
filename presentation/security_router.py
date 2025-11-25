@@ -2,8 +2,11 @@ from typing import Annotated
 from fastapi import Depends, APIRouter, HTTPException
 
 from domain.entities import APIResponse
-from application.dto.security import SignInUserEmail, SignUpResponse, SignUpUser, Token, SignInUserUsername
+from application.dto.security import SignInUserEmail, SignUpResponse, SignUpUser, Token, SignInUserUsername, GetUser
 from application.features.security.commands import SignUp, SignInEmail, SignInUsername
+from application.features.security.queries import UserMeFeature
+
+from application.features.security import authorize
 
 security_router: APIRouter = APIRouter(prefix='/users', tags=['Security'])
 
@@ -36,4 +39,12 @@ async def sign_in_user_by_username(sign_in_user: SignInUserUsername, service: An
     if result.status_code > 299:
         raise HTTPException(result.status_code, detail={ **result.model_dump() })
     
+    return result
+
+@security_router.get('/me/{username}', status_code=200)
+@authorize()
+async def user_me(username: str, service: Annotated[UserMeFeature, Depends(UserMeFeature)]) -> APIResponse[GetUser]:
+
+    result: APIResponse[GetUser] = await service.user_me_username( username )
+
     return result

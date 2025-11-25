@@ -3,7 +3,7 @@ import logging
 from typing import Annotated
 from fastapi import Depends
 
-from infrastructure.repositories import CategoriesRepository, UnitOfWork
+from infrastructure.repositories import CategoriesRepository
 from application.dto import AddCategory, GetCategory
 from domain.entities import Category, APIResponse
 
@@ -14,12 +14,10 @@ class AddCategoryCommand:
     
     __reposotiry: CategoriesRepository
     __response: ServiceResponse[GetCategory]
-    __unit_of_work: UnitOfWork
     
-    def __init__(self, repository: Annotated[CategoriesRepository, Depends(CategoriesRepository)], unit_of_work: Annotated[UnitOfWork, Depends(UnitOfWork)]) -> None:
+    def __init__(self, repository: Annotated[CategoriesRepository, Depends(CategoriesRepository)]) -> None:
         self.__reposotiry = repository
         self.__response = ServiceResponse[GetCategory]()
-        self.__unit_of_work = unit_of_work 
         
     async def add_category(self, category_to_be_saved: AddCategory) -> APIResponse[GetCategory]:
         

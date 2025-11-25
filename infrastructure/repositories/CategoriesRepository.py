@@ -33,9 +33,7 @@ class CategoriesRepository:
         
         self.__db_context.add( category )
         
-        await self.__db_context.commit()
-        
-        await self.__db_context.refresh( category )
+        await self.__db_context.flush()
         
         return category
     
