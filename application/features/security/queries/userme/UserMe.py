@@ -21,7 +21,6 @@ class UserMeFeature:
 
     
     async def user_me_username(self, username: str) -> APIResponse[GetUser]:
-
         try:
             response: User | None = await self.__respository.get_user_by_username( username )
 

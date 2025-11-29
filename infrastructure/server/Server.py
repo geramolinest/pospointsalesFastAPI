@@ -5,14 +5,20 @@ from infrastructure.adapters.middlewares import GlobalContextRequestMiddleware
 
 from presentation import main_routerv1
 
-
+from utils import Config
 class Server:
     
     __app: FastAPI
     __db_context: ApplicationDBContext
+
+    __config: Config
     
     def __init__(self) -> None:
+        #App creation
         self.__app = FastAPI()
+
+        #Config initialization
+        self.__config = Config()
         
         #Including routes
         self.__include_routes()

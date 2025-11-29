@@ -1,4 +1,3 @@
-import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -52,46 +51,4 @@ class UsersRepository:
     
         return user
     
-    async def add_admin_user(self) -> None:
-        
-        username = self.__config.get_value('ADMIN_USER')
-        
-        if not username:
-            raise Exception('Username for admin user is not present')
-        
-        normalized_username: str = username.upper().strip()
-        
-        email_env: str | None = self.__config.get_value('ADMIN_USER_EMAIL')
-        
-        if not email_env:
-            raise Exception('Email for admin user is not present')
-        
-        normalized_email: str = email_env.upper().strip()
-
-        #Verify if username provided for admin user already exists in DB
-        exists_username: User | None = await self.get_user_by_username( username )
-        
-        #Verify if email provided for admin user already exists in DB
-        exists_email = await self.get_user_by_email( email_env )
-
-        if exists_username or exists_email:
-            logging.warning('Email or username provided for admin user in environment already exists, verify if you have an admin user')
-            return
-        
-        password: str | None = self.__config.get_value('ADMIN_USER_PASS')
-        
-        if not password:
-            raise Exception('Password for admin user not present')
-        
-        password_hashed: str = self.__bcrypt.hash_password(password)
-        
-        user: User = User(
-            username=username,
-            normalized_username=normalized_username,
-            email=email_env,
-            normalized_email=normalized_email,
-            password=password_hashed
-        )
-        
-        self.__db_context.add(user)
-        await self.__db_context.flush()
+    

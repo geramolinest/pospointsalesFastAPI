@@ -1,8 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from asyncio import get_event_loop
-
 from infrastructure.persistence import DbSession
 from utils import ConfigDep, Config
 from domain.entities import Role, User
@@ -14,10 +12,6 @@ class RolesRepository:
     def __init__(self, db_context: DbSession, config: ConfigDep) -> None:
         self.__db_context = db_context
         self.__config = config
-
-        #Create admin role and asign to admin user
-        event_loop = get_event_loop()
-        event_loop.create_task( self.__add_admin_role_and_asign() )
 
     async def add_role(self, role: Role) -> Role:
 
@@ -60,7 +54,7 @@ class RolesRepository:
 
         return not result.scalar_one_or_none() is None
     
-    async def __add_admin_role_and_asign(self) -> None:
+    async def add_admin_role_and_asign(self) -> None:
 
         admin_role_name: str = self.__config.get_value('ADMIN_ROLE') or 'ADMIN'
 
