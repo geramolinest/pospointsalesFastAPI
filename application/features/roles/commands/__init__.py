@@ -1,0 +1,1 @@
+from .AddRole import AddRoleCommand # type: ignore

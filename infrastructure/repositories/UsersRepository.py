@@ -1,23 +1,16 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from domain.entities import User
 from infrastructure.persistence import DbSession
 
-from utils import Config, ConfigDep
-from utils.security import BCryptDep, BCrypt
-
 class UsersRepository:
     
     __db_context: AsyncSession
-    __config: Config
-    __bcrypt: BCrypt
     
-    def __init__(self, db_context: DbSession, config: ConfigDep, bcrypt: BCryptDep) -> None:
-        self.__db_context = db_context
-        self.__config = config
-        self.__bcrypt = bcrypt
-        
+    def __init__(self, db_context: DbSession) -> None:
+        self.__db_context = db_context    
         
     async def get_user_by_email(self, email: str) -> User | None:
         
@@ -50,5 +43,18 @@ class UsersRepository:
         await self.__db_context.flush()
     
         return user
-    
-    
+
+    async def get_roles_by_username(self, username: str) -> list[str] | None:
+        
+        stmt = select(User).options(selectinload(User.roles)).where(User.normalized_username == username.upper().strip() ) #type: ignore
+
+        result = await self.__db_context.execute( stmt )
+
+        user: User | None = result.scalar_one_or_none()
+
+        if not user:
+            return None
+        
+        user_roles: list[str] = [ role.normalized_role_name for role in user.roles ] #type: ignore
+        
+        return user_roles

@@ -9,9 +9,13 @@ from typing import Any, Callable, Union, Awaitable, TypeVar, cast
 
 from infrastructure.adapters.context import current_request
 from application.features.response.ServiceResponse import ServiceResponse
+from application.dto.security import GetUser
 
 from utils.security import JwtToken
 from utils import Config
+from infrastructure.repositories import UsersRepository
+from infrastructure.persistence import ApplicationDBContext
+
 
 R = TypeVar('R')
 
@@ -44,12 +48,36 @@ def authorize( roles: list[str] = [] ) -> Callable[[RouteHandler[R]], RouteHandl
             
             token_str = token_str.replace('Bearer', '').strip()
 
-            payload = jwt.verify_token( token_str )
+            payload: GetUser | None = jwt.verify_token( token_str )
             
             if not payload:
                 raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail={ **response_builder.unatuhorized_response().model_dump() })
             
             logging.info({ **payload.model_dump() })
+
+            if roles.__len__():
+                logging.info('Roles required for this endpoint')
+
+                users_repository: UsersRepository = UsersRepository( ApplicationDBContext().get_session()() )
+
+                roles_from_db: list[str] | None = await users_repository.get_roles_by_username( payload.username)
+
+                if not roles_from_db:
+                    logging.info('No roles found for this user, raising forbidden exception')
+                    raise HTTPException(status.HTTP_403_FORBIDDEN, detail={ **response_builder.forbidden_response().model_dump() })
+
+                authorized_flag: bool = False
+                
+                logging.info('Roles from DB founded for this user')
+
+                for role in roles:
+                    if role.upper().strip() in roles_from_db:
+                        logging.info(f'Role {role} authorized')
+                        authorized_flag = True
+                        break
+                
+                if not authorized_flag:
+                    raise HTTPException(status.HTTP_403_FORBIDDEN, detail={ **response_builder.forbidden_response().model_dump() })
 
             if iscoroutinefunction(handler):
                 result: R = await handler(*args, **kwargs)

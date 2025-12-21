@@ -60,5 +60,14 @@ class ServiceResponse(Generic[T]):
             data=data,
             message=msg
         )
+    
+    @staticmethod
+    def forbidden_response(msg: str = 'You are not authorized to access this resource.', data: T = None) -> APIResponse[T]:
+        return APIResponse(
+            status_code=403,
+            status_text=Constants.FORBIDDEN_STATUS_TEXT,
+            data=data,
+            message=msg
+        )
         
     

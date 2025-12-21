@@ -2,6 +2,9 @@ from uuid import uuid4, UUID
 from sqlalchemy import Uuid as ALQUUID, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from utils import Config
+from utils.security import BCrypt
+
 from . import Base
 
 class User(Base):
@@ -16,5 +19,23 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     roles: Mapped[list['Role']] = relationship(secondary='roles_users', back_populates='users') # type: ignore
 
+    @staticmethod
+    def get_admin_user( config: Config ):
     
+        admin_username: str = config.get_value('ADMIN_USER') or 'ADMIN'
+
+
+        admin_email: str = config.get_value('ADMIN_USER_EMAIL') or 'email@example.com'
+
+        admin_password: str = config.get_value('ADMIN_USER_PASS') or 'PASSWORD123!'
+
+        bcrypt: BCrypt = BCrypt()
+
+        return User( 
+                    username=admin_username.strip(), 
+                    normalized_username=admin_username.upper().strip(), 
+                    email=admin_email.strip(),
+                    normalized_email=admin_email.upper().strip(),
+                    password=bcrypt.hash_password(admin_password.strip())
+                )
     
