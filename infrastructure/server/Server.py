@@ -39,6 +39,6 @@ class Server:
         self.__app.add_middleware(GlobalContextRequestMiddleware)
         
     def __configure_database(self) -> None:
-        self.__db_context = ApplicationDBContext() # type: ignore
+        self.__db_context = ApplicationDBContext()
         
     

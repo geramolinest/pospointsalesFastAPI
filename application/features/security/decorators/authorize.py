@@ -58,26 +58,28 @@ def authorize( roles: list[str] = [] ) -> Callable[[RouteHandler[R]], RouteHandl
             if roles.__len__():
                 logging.info('Roles required for this endpoint')
 
-                users_repository: UsersRepository = UsersRepository( ApplicationDBContext().get_session()() )
+                async with ApplicationDBContext().get_session()() as session:
 
-                roles_from_db: list[str] | None = await users_repository.get_roles_by_username( payload.username)
+                    users_repository: UsersRepository = UsersRepository( session )
 
-                if not roles_from_db:
-                    logging.info('No roles found for this user, raising forbidden exception')
-                    raise HTTPException(status.HTTP_403_FORBIDDEN, detail={ **response_builder.forbidden_response().model_dump() })
+                    roles_from_db: list[str] | None = await users_repository.get_roles_by_username( payload.username)
 
-                authorized_flag: bool = False
-                
-                logging.info('Roles from DB founded for this user')
+                    if not roles_from_db:
+                        logging.info('No roles found for this user, raising forbidden exception')
+                        raise HTTPException(status.HTTP_403_FORBIDDEN, detail={ **response_builder.forbidden_response().model_dump() })
 
-                for role in roles:
-                    if role.upper().strip() in roles_from_db:
-                        logging.info(f'Role {role} authorized')
-                        authorized_flag = True
-                        break
-                
-                if not authorized_flag:
-                    raise HTTPException(status.HTTP_403_FORBIDDEN, detail={ **response_builder.forbidden_response().model_dump() })
+                    authorized_flag: bool = False
+                    
+                    logging.info('Roles from DB founded for this user')
+
+                    for role in roles:
+                        if role.upper().strip() in roles_from_db:
+                            logging.info(f'Role {role} authorized')
+                            authorized_flag = True
+                            break
+                    
+                    if not authorized_flag:
+                        raise HTTPException(status.HTTP_403_FORBIDDEN, detail={ **response_builder.forbidden_response().model_dump() })
 
             if iscoroutinefunction(handler):
                 result: R = await handler(*args, **kwargs)
