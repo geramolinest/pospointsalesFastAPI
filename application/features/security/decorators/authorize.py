@@ -62,23 +62,9 @@ def authorize( roles: list[str] = [] ) -> Callable[[RouteHandler[R]], RouteHandl
 
                     users_repository: UsersRepository = UsersRepository( session )
 
-                    roles_from_db: list[str] | None = await users_repository.get_roles_by_username( payload.username)
-
-                    if not roles_from_db:
-                        logging.info('No roles found for this user, raising forbidden exception')
-                        raise HTTPException(status.HTTP_403_FORBIDDEN, detail={ **response_builder.forbidden_response().model_dump() })
-
-                    authorized_flag: bool = False
+                    is_authorized: bool = await users_repository.is_user_authorized( payload.username, [ role.upper().strip() for role in roles ] )
                     
-                    logging.info('Roles from DB founded for this user')
-
-                    for role in roles:
-                        if role.upper().strip() in roles_from_db:
-                            logging.info(f'Role {role} authorized')
-                            authorized_flag = True
-                            break
-                    
-                    if not authorized_flag:
+                    if not is_authorized:
                         raise HTTPException(status.HTTP_403_FORBIDDEN, detail={ **response_builder.forbidden_response().model_dump() })
 
             if iscoroutinefunction(handler):

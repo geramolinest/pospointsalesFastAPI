@@ -17,7 +17,7 @@ class User(Base):
     normalized_email: Mapped[str] = mapped_column(String(25), unique=True, index=True, nullable=False)
     password: Mapped[str] = mapped_column(String(100), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    roles: Mapped[list['Role']] = relationship(secondary='roles_users', back_populates='users') # type: ignore
+    roles: Mapped[list['Role']] = relationship(secondary='roles_users', back_populates='users', lazy='selectin') # type: ignore
 
     @staticmethod
     def get_admin_user( config: Config ):

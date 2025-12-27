@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from domain.entities import User
+from domain.entities import User, Role
 from infrastructure.persistence import DbSession
 
 class UsersRepository:
@@ -44,7 +44,7 @@ class UsersRepository:
     
         return user
 
-    async def get_roles_by_username(self, username: str) -> list[str] | None:
+    async def get_roles_by_username(self, username: str, roles: list[str]) -> list[str] | None:
         
         stmt = select(User).options(selectinload(User.roles)).where(User.normalized_username == username.upper().strip() ) #type: ignore
 
@@ -58,3 +58,21 @@ class UsersRepository:
         user_roles: list[str] = [ role.normalized_role_name for role in user.roles ] #type: ignore
         
         return user_roles
+    
+    async def is_user_authorized(self, username: str, roles: list[str]) -> bool:
+        
+        stmt = select(User).join(User.roles).where( User.normalized_username == username.upper().strip() ).where( Role.normalized_role_name.in_(roles) ) #type: ignore
+
+        result = await self.__db_context.execute( stmt )
+
+        user: User | None = result.scalar_one_or_none()
+
+        return not user is None
+    
+    async def asign_role_to_user(self, user: User, role: Role) -> User:
+        
+        user.roles.append( role ) #type: ignore
+        
+        await self.__db_context.flush()
+
+        return user
